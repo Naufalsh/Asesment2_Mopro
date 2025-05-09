@@ -70,9 +70,9 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     // Fungsi untuk menghapus data penjualan
-    fun deleteSales(sales: Sales) {
+    fun deleteSales(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            salesDao.deleteSale(sales)
+            salesDao.deleteSale(id)
             loadAllSales() // Perbarui setelah menghapus
         }
     }

@@ -1,5 +1,6 @@
 package com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,10 +31,12 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -47,6 +50,13 @@ import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.components.Bot
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavHostController) {
+    val viewModel: SalesViewModel = viewModel()
+    val salesData by viewModel.allSales.collectAsState(initial = emptyList())
+
+    // Hitung total pendapatan
+    val totalRevenue = remember(salesData) {
+        salesData.sumOf { it.sales.totalPrice }
+    }
     Scaffold(
         topBar = {
             TopAppBar(
@@ -59,7 +69,24 @@ fun MainScreen(navController: NavHostController) {
                 ),
             )
         },
-        bottomBar = { BottomNavigationBar(navController) },
+        bottomBar = {
+            Column {
+                // Tambahkan Box untuk total pendapatan di atas bottom navigation
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(8.dp)
+                ) {
+                    Text(
+                        text = "Total Pendapatan: Rp${"%,.2f".format(totalRevenue)}",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.align(Alignment.CenterStart),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                BottomNavigationBar(navController)
+            }
+        },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
@@ -84,7 +111,6 @@ fun ScreenContent(showList: Boolean, modifier: Modifier = Modifier, navControlle
     val data by viewModel.allSales.collectAsState(initial = emptyList())
 
 
-
     if (data.isEmpty()) {
         Column (
             modifier = modifier.fillMaxSize().padding(16.dp),
@@ -97,7 +123,7 @@ fun ScreenContent(showList: Boolean, modifier: Modifier = Modifier, navControlle
         ) {
             items(data) { saleWithProduct ->
                 SaleItem(sale = saleWithProduct) {
-                    navController.navigate(Screen.ubahProduct.withId(saleWithProduct.sales.id))
+                    navController.navigate(Screen.ubahPenjualan.withIdPenjualan(saleWithProduct.sales.id))
                 }
                 HorizontalDivider()
             }

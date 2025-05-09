@@ -10,6 +10,7 @@ import androidx.navigation.navArgument
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.AddProductScreen
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.AddSalesScreen
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.KEY_ID_PRODUCT
+import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.KEY_ID_SALES
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.ListProductScreen
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.MainScreen
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.ProductListScreen
@@ -41,6 +42,15 @@ fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
         }
         composable(route = Screen.AddSales.route) {
             AddSalesScreen(navController)
+        }
+        composable(
+            route = Screen.ubahPenjualan.route,
+            arguments = listOf(
+                navArgument(KEY_ID_SALES) { type = NavType.LongType }
+            )
+        ) { navBackStackEntry ->
+            val id = navBackStackEntry.arguments?.getLong(KEY_ID_SALES)
+            AddSalesScreen(navController, id)
         }
 
     }

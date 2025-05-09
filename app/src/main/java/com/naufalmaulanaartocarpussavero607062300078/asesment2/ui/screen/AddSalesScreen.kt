@@ -1,72 +1,47 @@
 package com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen
 
-import android.app.Application
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.outlined.Check
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.R
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.model.Product
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.model.Sales
-import java.text.NumberFormat
-import java.util.Locale
+
+const val KEY_ID_SALES = "idSales"
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AddSalesScreen(navController: NavHostController) {
-    val context = LocalContext.current
-    val salesViewModel: SalesViewModel = viewModel(
-        factory = object : ViewModelProvider.Factory {
-            override fun <T : ViewModel> create(modelClass: Class<T>): T {
-                return SalesViewModel(context.applicationContext as Application) as T
+fun AddSalesScreen(navController: NavHostController, id: Long? = null) {
+    val viewModel: SalesViewModel = viewModel()
+
+    var selectedProductId by remember { mutableStateOf<Long?>(null) }
+    var quantity by remember { mutableStateOf("") }
+    var productName by remember { mutableStateOf("") }
+    var productPrice by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false) }
+
+    // Load sales data if ID is not null (edit mode)
+    LaunchedEffect(id) {
+        if (id != null) {
+            val salesWithProduct = viewModel.getSalesById(id)
+            salesWithProduct?.let {
+                selectedProductId = it.sales.productId
+                quantity = it.sales.quantity.toString()
+                productName = it.product.name
+                productPrice = it.product.price.toString()
             }
-        }
-    )
-
-    // State variables
-    var selectedProduct by remember { mutableStateOf<Product?>(null) }
-    var isDropdownExpanded by remember { mutableStateOf(false) }
-    var soldQuantity by remember { mutableStateOf("") }
-    var products by remember { mutableStateOf<List<Product>>(emptyList()) }
-
-    // Load products from database
-    LaunchedEffect(Unit) {
-        salesViewModel.allProducts.collect { productList ->
-            products = productList
         }
     }
 
@@ -82,7 +57,14 @@ fun AddSalesScreen(navController: NavHostController) {
                         )
                     }
                 },
-                title = { Text(text = stringResource(id = R.string.tambah_penjualan)) },
+                title = {
+                    Text(
+                        text = if (id == null)
+                            stringResource(id = R.string.tambah_penjualan)
+                        else
+                            stringResource(id = R.string.edit_penjualan)
+                    )
+                },
                 colors = TopAppBarDefaults.mediumTopAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
@@ -90,20 +72,26 @@ fun AddSalesScreen(navController: NavHostController) {
                 actions = {
                     IconButton(
                         onClick = {
-                            selectedProduct?.let { product ->
-                                val quantity = soldQuantity.toIntOrNull() ?: 0
-                                if (quantity > 0) {
-                                    val sales = Sales(
-                                        productId = product.id,
-                                        quantity = quantity,
-                                        totalPrice = product.price * quantity
-                                    )
-                                    salesViewModel.insertSales(sales)
-                                    navController.popBackStack()
+                            selectedProductId?.let { productId ->
+                                val quantityValue = quantity.toIntOrNull() ?: 0
+                                val priceValue = productPrice.toDoubleOrNull() ?: 0.0
+                                val totalPrice = priceValue * quantityValue
+
+                                val sales = Sales(
+                                    id = id ?: 0L,
+                                    productId = productId,
+                                    quantity = quantityValue,
+                                    totalPrice = totalPrice
+                                )
+
+                                if (id == null) {
+                                    viewModel.insertSales(sales)
+                                } else {
+                                    viewModel.updateSales(sales)
                                 }
+                                navController.popBackStack()
                             }
-                        },
-                        enabled = selectedProduct != null && soldQuantity.toIntOrNull() ?: 0 > 0
+                        }
                     ) {
                         Icon(
                             imageVector = Icons.Outlined.Check,
@@ -111,103 +99,143 @@ fun AddSalesScreen(navController: NavHostController) {
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
+                    if (id!=null)
+                        DeleteAction {
+                            showDialog = true
+                        }
                 }
             )
         },
         content = { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .padding(innerPadding)
-                    .padding(16.dp)
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                // Product Dropdown
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    OutlinedTextField(
-                        value = selectedProduct?.name ?: "",
-                        onValueChange = {},
-                        label = { Text(stringResource(R.string.pilih_produk)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true,
-                        trailingIcon = {
-                            IconButton(onClick = { isDropdownExpanded = true }) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowDropDown,
-                                    contentDescription = stringResource(R.string.dropdown_produk)
-                                )
-                            }
-                        }
-                    )
-
-                    DropdownMenu(
-                        expanded = isDropdownExpanded,
-                        onDismissRequest = { isDropdownExpanded = false },
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        products.forEach { product ->
-                            DropdownMenuItem(
-                                text = { Text(product.name) },
-                                onClick = {
-                                    selectedProduct = product
-                                    isDropdownExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-
-                // Auto-filled fields based on selected product
-                OutlinedTextField(
-                    value = selectedProduct?.descProduct ?: "",
-                    onValueChange = {},
-                    label = { Text(stringResource(R.string.deskripsi_produk)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    readOnly = true,
-                    minLines = 3
-                )
-
-                OutlinedTextField(
-                    value = selectedProduct?.price?.let {
-                        "Rp ${NumberFormat.getNumberInstance(Locale.getDefault()).format(it)}"
-                    } ?: "",
-                    onValueChange = {},
-                    label = { Text(stringResource(R.string.harga_satuan)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    readOnly = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
-                )
-
-                // Quantity input field
-                OutlinedTextField(
-                    value = soldQuantity,
-                    onValueChange = { newValue ->
-                        if (newValue.isEmpty() || newValue.toIntOrNull() != null) {
-                            soldQuantity = newValue
-                        }
-                    },
-                    label = { Text(stringResource(R.string.jumlah_produk_terjual)) },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    isError = soldQuantity.isNotEmpty() && soldQuantity.toIntOrNull() == null
-                )
-
-                // Total Price (calculated)
-                selectedProduct?.let { product ->
-                    val quantity = soldQuantity.toIntOrNull() ?: 0
-                    val total = product.price * quantity
-                    OutlinedTextField(
-                        value = "Rp ${NumberFormat.getNumberInstance(Locale.getDefault()).format(total)}",
-                        onValueChange = {},
-                        label = { Text(stringResource(R.string.total_harga)) },
-                        modifier = Modifier.fillMaxWidth(),
-                        readOnly = true
-                    )
+            FormTambahPenjualan(
+                productName = productName,
+                onProductSelected = { product ->
+                    selectedProductId = product.id
+                    productName = product.name
+                    productPrice = product.price.toString()
+                },
+                quantity = quantity,
+                onQuantityChange = { quantity = it },
+                productPrice = productPrice,
+                totalPrice = (productPrice.toDoubleOrNull() ?: 0.0) * (quantity.toIntOrNull() ?: 0),
+                modifier = Modifier.padding(innerPadding)
+            )
+            if (id!=null && showDialog) {
+                DisplayAlertDialog(
+                    onDismissRequest = { showDialog = false }) {
+                    showDialog = false
+                    viewModel.deleteSales(id)
+                    navController.popBackStack()
                 }
             }
         }
     )
+}
+
+@Composable
+fun FormTambahPenjualan(
+    productName: String,
+    onProductSelected: (Product) -> Unit,
+    quantity: String,
+    onQuantityChange: (String) -> Unit,
+    productPrice: String,
+    totalPrice: Double,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        // Product Selection (Dropdown)
+        ProductDropdown(
+            selectedProductName = productName,
+            onProductSelected = onProductSelected
+        )
+
+        // Product Price (read-only)
+        OutlinedTextField(
+            value = productPrice,
+            onValueChange = {},
+            label = { Text(stringResource(R.string.harga_satuan)) },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true,
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Next
+            )
+        )
+
+        // Quantity Input
+        OutlinedTextField(
+            value = quantity,
+            onValueChange = { newValue ->
+                if (newValue.isEmpty() || newValue.toIntOrNull() != null) {
+                    onQuantityChange(newValue)
+                }
+            },
+            label = { Text(stringResource(R.string.jumlah_produk_terjual)) },
+            keyboardOptions = KeyboardOptions(
+                keyboardType = KeyboardType.Number,
+                imeAction = ImeAction.Done
+            ),
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        // Total Price (read-only)
+        OutlinedTextField(
+            value = "Rp ${"%.2f".format(totalPrice)}",
+            onValueChange = {},
+            label = { Text(stringResource(R.string.total_harga)) },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true
+        )
+    }
+}
+
+// Product Dropdown Component
+@Composable
+fun ProductDropdown(
+    selectedProductName: String,
+    onProductSelected: (Product) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+    val viewModel: ProductViewModel = viewModel()
+    val products by viewModel.allProducts.collectAsState(initial = emptyList())
+
+    Box(modifier = modifier.fillMaxWidth()) {
+        OutlinedTextField(
+            value = selectedProductName,
+            onValueChange = {},
+            label = { Text(stringResource(R.string.pilih_produk)) },
+            modifier = Modifier.fillMaxWidth(),
+            readOnly = true,
+            trailingIcon = {
+                IconButton(onClick = { expanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = stringResource(R.string.pilih_produk)
+                    )
+                }
+            }
+        )
+
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            products.forEach { product ->
+                DropdownMenuItem(
+                    text = { Text(product.name) },
+                    onClick = {
+                        onProductSelected(product)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }

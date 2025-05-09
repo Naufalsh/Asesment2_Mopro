@@ -43,9 +43,9 @@ class ProductViewModel(application: Application) : AndroidViewModel(application)
     }
 
     // Fungsi untuk menghapus produk dari database
-    fun deleteProduct(product: Product) {
+    fun deleteProduct(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
-            productDao.deleteProduct(product)
+            productDao.deleteById(id)
             loadProducts() // Perbarui daftar produk setelah dihapus
         }
     }

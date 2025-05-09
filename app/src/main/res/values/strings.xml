@@ -7,7 +7,8 @@
     <string name="nama_produk">Nama Produk</string>
     <string name="deskripsi_produk">Deskripsi Produk</string>
     <string name="harga">Harga</string>
-    <string name="edit_produk">Edit</string>
+    <string name="edit_produk">Edit Produk</string>
+    <string name="edit_penjualan">Edit Penjualan</string>
     <string name="tambah_penjualan">Tambah Penjualan</string>
 
     <string name="pilih_produk">Pilih Produk</string>
@@ -16,6 +17,16 @@
     <string name="harga_satuan">Harga Satuan</string>
     <string name="jumlah_produk_terjual">Jumlah Produk Terjual</string>
     <string name="total_harga">Total Harga</string>
+    <string name="lainnya">lainnya</string>
+    <string name="hapus">Hapus</string>
+
+    <string name="konfirmasi_hapus">Konfirmasi Hapus</string>
+    <string name="apakah_anda_yakin_hapus_produk">Apakah Anda yakin ingin menghapus produk ini?</string>
+    <string name="batal">Batal</string>
+
+    <string name="pesan_hapus_product">Hapus Data ini?</string>
+    <string name="tombol_hapus">Hapus</string>
+    <string name="tombol_batal">Batal</string>
 
 
 </resources>

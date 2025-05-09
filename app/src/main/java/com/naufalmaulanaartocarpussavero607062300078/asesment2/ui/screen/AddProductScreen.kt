@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,6 +33,7 @@ fun AddProductScreen(navController: NavHostController, id: Long? = null) {
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
+    var showDialog by remember { mutableStateOf(false) }
 
     // Load product data if ID is not null (edit mode)
     LaunchedEffect(id) {
@@ -93,6 +95,11 @@ fun AddProductScreen(navController: NavHostController, id: Long? = null) {
                             tint = MaterialTheme.colorScheme.primary
                         )
                     }
+                    if (id!=null) {
+                        DeleteAction {
+                            showDialog = true
+                        }
+                    }
                 }
             )
         },
@@ -106,6 +113,14 @@ fun AddProductScreen(navController: NavHostController, id: Long? = null) {
                 onPriceChange = { price = it },
                 modifier = Modifier.padding(innerPadding)
             )
+            if (id!=null && showDialog) {
+                DisplayAlertDialog(
+                    onDismissRequest = { showDialog = false }) {
+                    showDialog = false
+                    viewModel.deleteProduct(id)
+                    navController.popBackStack()
+                }
+            }
         }
     )
 }
@@ -158,5 +173,30 @@ fun FormTambahProduk(
             ),
             modifier = Modifier.fillMaxWidth()
         )
+    }
+}
+
+@Composable
+fun DeleteAction(delete: () -> Unit) {
+    var expanded by remember { mutableStateOf(false) }
+
+    IconButton(onClick = { expanded = true }) {
+        Icon(
+            imageVector = Icons.Filled.MoreVert,
+            contentDescription = stringResource(id = R.string.lainnya),
+            tint = MaterialTheme.colorScheme.primary
+        )
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            DropdownMenuItem(
+                text = { Text(text = stringResource(id = R.string.hapus)) },
+                onClick = {
+                    expanded = false
+                    delete()
+                },
+            )
+        }
     }
 }

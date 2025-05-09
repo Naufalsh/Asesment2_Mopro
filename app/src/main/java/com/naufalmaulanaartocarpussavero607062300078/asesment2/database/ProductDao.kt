@@ -17,8 +17,8 @@ interface ProductDao {
     @Update
     suspend fun updateProduct(product: Product)
 
-    @Delete
-    suspend fun deleteProduct(product: Product)
+    @Query("DELETE FROM products WHERE id = :id")
+    suspend fun deleteById(id: Long)
 
     @Query("SELECT * FROM products ORDER BY id DESC")
     fun getAllProducts(): Flow<List<Product>>

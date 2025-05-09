@@ -19,8 +19,8 @@ interface SalesDao {
     @Update
     suspend fun updateSale(sale: Sales)
 
-    @Delete
-    suspend fun deleteSale(sale: Sales)
+    @Query("DELETE FROM sales WHERE id = :id")
+    suspend fun deleteSale(id: Long)
 
     @Transaction
     @Query("SELECT * FROM sales ORDER BY date DESC")
