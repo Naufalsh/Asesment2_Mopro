@@ -8,6 +8,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.AddProductScreen
+import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.AddSalesScreen
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.KEY_ID_PRODUCT
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.ListProductScreen
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.MainScreen
@@ -37,6 +38,9 @@ fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
             navBackStackEntry ->
             val id = navBackStackEntry.arguments?.getLong(KEY_ID_PRODUCT)
             AddProductScreen(navController, id)
+        }
+        composable(route = Screen.AddSales.route) {
+            AddSalesScreen(navController)
         }
 
     }

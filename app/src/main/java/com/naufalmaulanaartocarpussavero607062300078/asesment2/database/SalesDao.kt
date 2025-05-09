@@ -25,4 +25,8 @@ interface SalesDao {
     @Transaction
     @Query("SELECT * FROM sales ORDER BY date DESC")
     fun getAllSalesWithProduct(): Flow<List<SalesWithProduct>>
+
+    @Transaction
+    @Query("SELECT * FROM sales WHERE id = :id")
+    suspend fun getSalesById(id: Long): SalesWithProduct?
 }

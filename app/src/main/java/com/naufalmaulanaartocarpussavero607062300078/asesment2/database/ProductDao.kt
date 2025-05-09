@@ -22,4 +22,7 @@ interface ProductDao {
 
     @Query("SELECT * FROM products ORDER BY id DESC")
     fun getAllProducts(): Flow<List<Product>>
+
+    @Query("SELECT * FROM products WHERE id = :id")
+    suspend fun getProductById(id: Long): Product?
 }

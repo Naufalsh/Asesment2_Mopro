@@ -33,12 +33,14 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.runtime.collectAsState
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.R
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.model.Product
+import com.naufalmaulanaartocarpussavero607062300078.asesment2.model.SalesWithProduct
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.navigation.Screen
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.components.BottomNavItem
 
@@ -61,7 +63,7 @@ fun MainScreen(navController: NavHostController) {
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navController.navigate("")
+                    navController.navigate(Screen.AddSales.route)
                 }
             ) {
                 Icon(
@@ -78,8 +80,9 @@ fun MainScreen(navController: NavHostController) {
 
 @Composable
 fun ScreenContent(showList: Boolean, modifier: Modifier = Modifier, navController: NavHostController) {
-    val viewModel: MainViewModel = viewModel()
-    val data = viewModel.data
+    val viewModel: SalesViewModel = viewModel()
+    val data by viewModel.allSales.collectAsState(initial = emptyList())
+
 
 
     if (data.isEmpty()) {
@@ -92,9 +95,9 @@ fun ScreenContent(showList: Boolean, modifier: Modifier = Modifier, navControlle
         LazyColumn(
             modifier = modifier.fillMaxSize()
         ) {
-            items(data) {
-                ListItem(product = it) {
-                    navController.navigate(Screen.ubahProduct.withId(it.id))
+            items(data) { saleWithProduct ->
+                SaleItem(sale = saleWithProduct) {
+                    navController.navigate(Screen.ubahProduct.withId(saleWithProduct.sales.id))
                 }
                 HorizontalDivider()
             }
@@ -141,27 +144,33 @@ fun BottomNavigationBar(navController: NavHostController) {
 }
 
 @Composable
-fun ListItem(product: Product, onClick: () -> Unit) {
-    Column (
-        modifier = Modifier.fillMaxWidth()
-        .clickable{onClick()}
-        .padding(16.dp),
+fun SaleItem(sale: SalesWithProduct, onClick: () -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = product.name,
+            text = "Produk: ${sale.product.name}",
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             fontWeight = FontWeight.Bold
         )
         Text(
-            text = product.descProduct,
-            maxLines = 2,
+            text = "Jumlah: ${sale.sales.quantity}",
+            maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
-        Text(text = product.price.toString())
+        Text(
+            text = "Total Harga: Rp${sale.sales.totalPrice}",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
+        )
     }
 }
+
 
 //@Preview(showBackground = true)
 //@Composable

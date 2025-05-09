@@ -16,9 +16,9 @@ import androidx.room.PrimaryKey
     ]
 )
 data class Sales(
-    @PrimaryKey(autoGenerate = true) val id: Int = 0,
-    val date: Long,
+    @PrimaryKey(autoGenerate = true) val id: Long = 0L,
+    val productId: Long,
     val quantity: Int,
     val totalPrice: Double,
-    val productId: Int
+    val date: String = System.currentTimeMillis().toString()
 )

@@ -8,4 +8,14 @@
     <string name="deskripsi_produk">Deskripsi Produk</string>
     <string name="harga">Harga</string>
     <string name="edit_produk">Edit</string>
+    <string name="tambah_penjualan">Tambah Penjualan</string>
+
+    <string name="pilih_produk">Pilih Produk</string>
+    <string name="dropdown_produk">Daftar Produk</string>
+
+    <string name="harga_satuan">Harga Satuan</string>
+    <string name="jumlah_produk_terjual">Jumlah Produk Terjual</string>
+    <string name="total_harga">Total Harga</string>
+
+
 </resources>

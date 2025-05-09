@@ -29,6 +29,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -83,8 +84,12 @@ fun ListProductScreen(navController: NavHostController) {
 
 @Composable
 fun ScreenContents(showList: Boolean, modifier: Modifier = Modifier, navController: NavHostController) {
-    val viewModel: MainViewModel = viewModel()
-    val data = viewModel.data
+//    val context = LocalContext.current
+//    val factory = ViewModelFactory(context)
+    val viewModel: ProductViewModel = viewModel()
+    val data by viewModel.allProducts.collectAsState()
+
+
 
     if (data.isEmpty()) {
         Column (
