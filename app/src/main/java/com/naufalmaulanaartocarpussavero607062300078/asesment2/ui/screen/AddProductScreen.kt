@@ -19,6 +19,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.R
 
 const val KEY_ID_PRODUCT = "idProduct"
@@ -37,9 +39,19 @@ const val KEY_ID_PRODUCT = "idProduct"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddProductScreen(navController: NavHostController, id: Long? = null) {
+    val viewModel: MainViewModel = viewModel()
+
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var price by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        if (id == null) return@LaunchedEffect
+        val data = viewModel.getProductById(id)?: return@LaunchedEffect
+        name = data.name
+        description = data.descProduct
+        price = data.price.toString()
+    }
 
     Scaffold(
         topBar = {

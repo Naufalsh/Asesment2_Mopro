@@ -85,7 +85,6 @@ fun ListProductScreen(navController: NavHostController) {
 fun ScreenContents(showList: Boolean, modifier: Modifier = Modifier, navController: NavHostController) {
     val viewModel: MainViewModel = viewModel()
     val data = viewModel.data
-    val context = LocalContext.current
 
     if (data.isEmpty()) {
         Column (
@@ -99,7 +98,7 @@ fun ScreenContents(showList: Boolean, modifier: Modifier = Modifier, navControll
         ) {
             items(data) {
                 ListItems(product = it) {
-
+                    navController.navigate(Screen.ubahProduct.withId(it.id))
                 }
                 HorizontalDivider()
             }

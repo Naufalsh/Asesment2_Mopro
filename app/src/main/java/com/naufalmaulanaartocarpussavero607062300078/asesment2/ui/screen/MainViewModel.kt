@@ -37,4 +37,8 @@ class MainViewModel : ViewModel() {
         ),
     )
 
+    fun getProductById(id: Long): Product? {
+        return data.find {it.id == id}
+    }
+
 }
