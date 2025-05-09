@@ -13,7 +13,6 @@ import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.KEY_ID_
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.KEY_ID_SALES
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.ListProductScreen
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.MainScreen
-import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.ProductListScreen
 
 @Composable
 fun SetupNavGraph(navController: NavHostController = rememberNavController()) {

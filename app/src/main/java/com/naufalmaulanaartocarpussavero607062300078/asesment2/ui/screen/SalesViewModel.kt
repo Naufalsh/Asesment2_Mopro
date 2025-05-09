@@ -14,26 +14,20 @@ import kotlinx.coroutines.runBlocking
 
 class SalesViewModel(application: Application) : AndroidViewModel(application) {
 
-    // DAO untuk akses database
     private val salesDao = AppDatabase.getInstance(application).salesDao()
     private val productDao = AppDatabase.getInstance(application).productDao()
 
-    // StateFlow untuk daftar penjualan dan produk
     private val _allSales = MutableStateFlow<List<SalesWithProduct>>(emptyList())
     val allSales: StateFlow<List<SalesWithProduct>> = _allSales.asStateFlow()
 
     private val _allProducts = MutableStateFlow<List<Product>>(emptyList())
     val allProducts: StateFlow<List<Product>> = _allProducts.asStateFlow()
 
-
-
     init {
         loadAllSales()
         loadAllProducts()
     }
 
-
-    // Fungsi untuk memuat semua data penjualan
     private fun loadAllSales() {
         viewModelScope.launch(Dispatchers.IO) {
             salesDao.getAllSalesWithProduct()
@@ -43,7 +37,6 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Fungsi untuk memuat semua data produk
     private fun loadAllProducts() {
         viewModelScope.launch(Dispatchers.IO) {
             productDao.getAllProducts()
@@ -53,31 +46,27 @@ class SalesViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // Fungsi untuk menambahkan data penjualan
     fun insertSales(sales: Sales) {
         viewModelScope.launch(Dispatchers.IO) {
             salesDao.insertSale(sales)
-            loadAllSales() // Perbarui setelah menambah
+            loadAllSales()
         }
     }
 
-    // Fungsi untuk mengupdate data penjualan
     fun updateSales(sales: Sales) {
         viewModelScope.launch(Dispatchers.IO) {
             salesDao.updateSale(sales)
-            loadAllSales() // Perbarui setelah mengubah
+            loadAllSales()
         }
     }
 
-    // Fungsi untuk menghapus data penjualan
     fun deleteSales(id: Long) {
         viewModelScope.launch(Dispatchers.IO) {
             salesDao.deleteSale(id)
-            loadAllSales() // Perbarui setelah menghapus
+            loadAllSales()
         }
     }
 
-    // Fungsi untuk mengambil penjualan berdasarkan ID
     fun getSalesById(id: Long): SalesWithProduct? {
         return runBlocking {
             salesDao.getSalesById(id)

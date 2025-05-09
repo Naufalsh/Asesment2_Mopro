@@ -1,5 +1,6 @@
 package com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -9,6 +10,7 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
@@ -24,6 +26,7 @@ const val KEY_ID_SALES = "idSales"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddSalesScreen(navController: NavHostController, id: Long? = null) {
+    val context = LocalContext.current
     val viewModel: SalesViewModel = viewModel()
 
     var selectedProductId by remember { mutableStateOf<Long?>(null) }
@@ -72,6 +75,11 @@ fun AddSalesScreen(navController: NavHostController, id: Long? = null) {
                 actions = {
                     IconButton(
                         onClick = {
+                            if (selectedProductId == null|| quantity == "" || productName == "" || !productPrice.matches(Regex("^\\d+(\\.\\d{1,2})?$"))) {
+                                Toast.makeText(context, R.string.invalid, Toast.LENGTH_LONG).show()
+                                return@IconButton
+                            }
+
                             selectedProductId?.let { productId ->
                                 val quantityValue = quantity.toIntOrNull() ?: 0
                                 val priceValue = productPrice.toDoubleOrNull() ?: 0.0
