@@ -2,4 +2,6 @@
     <string name="app_name">Asesment2</string>
     <string name="tambah_produk">Tambah Produk</string>
     <string name="list_kosong">Belum ada data</string>
+    <string name="kembali">kembali</string>
+    <string name="simpan"> Simpan</string>
 </resources>

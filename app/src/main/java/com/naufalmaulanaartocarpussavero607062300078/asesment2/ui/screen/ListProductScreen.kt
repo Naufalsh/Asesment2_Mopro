@@ -1,6 +1,10 @@
 package com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -10,14 +14,24 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.*
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationBar
+import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -27,7 +41,7 @@ import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.components.Bot
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProdukListScreen(navController: NavHostController) {
+fun ListProductScreen(navController: NavHostController) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -40,11 +54,11 @@ fun ProdukListScreen(navController: NavHostController) {
                 ),
             )
         },
-        bottomBar = { BottomNavigationBar(navController) },
+        bottomBar = { BottomNavigationBars(navController) },
         floatingActionButton = {
             FloatingActionButton(
                 onClick = {
-                    navController.navigate("")
+                    navController.navigate(Screen.AddProduct.route)
                 }
             ) {
                 Icon(
@@ -55,43 +69,10 @@ fun ProdukListScreen(navController: NavHostController) {
             }
         }
     ) { innerPadding ->
-        ScreenContent(showList = true, modifier = Modifier.padding(innerPadding), navController)
+        ScreenContents(showList = true, modifier = Modifier.padding(innerPadding), navController)
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ProductListScreen(navController: NavHostController) {
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = {
-                    Text(text = "Produk")
-                },
-                colors = TopAppBarDefaults.mediumTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-            )
-        },
-        bottomBar = { BottomNavigationBar(navController) },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    navController.navigate("")
-                }
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Add,
-                    contentDescription = stringResource(id = R.string.tambah_produk),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-            }
-        }
-    ) { innerPadding ->
-        ScreenContent(showList = true, modifier = Modifier.padding(innerPadding), navController)
-    }
-}
 
 @Composable
 fun ScreenContents(showList: Boolean, modifier: Modifier = Modifier, navController: NavHostController) {
@@ -113,7 +94,7 @@ fun ScreenContents(showList: Boolean, modifier: Modifier = Modifier, navControll
             ) {
                 items(data) { item ->
                     Text(text = item, modifier = Modifier.padding(8.dp))
-                    Divider()
+                    HorizontalDivider()
                 }
             }
         } else {
@@ -135,7 +116,7 @@ fun ScreenContents(showList: Boolean, modifier: Modifier = Modifier, navControll
 fun BottomNavigationBars(navController: NavHostController) {
     val items = listOf(
         BottomNavItem.BottomNavItem("Penjualan", Screen.Home.route, Icons.Filled.Warning),
-        BottomNavItem.BottomNavItem("Produk", Screen.ProductList.route, Icons.Filled.Info)
+        BottomNavItem.BottomNavItem("Produk", Screen.ListProduct.route, Icons.Filled.Info)
     )
 
     NavigationBar(

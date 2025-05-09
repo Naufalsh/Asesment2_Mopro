@@ -149,7 +149,7 @@ fun ScreenContent(showList: Boolean, modifier: Modifier = Modifier, navControlle
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
         BottomNavItem.BottomNavItem("Penjualan", Screen.Home.route, Icons.Filled.Warning),
-        BottomNavItem.BottomNavItem("Produk", Screen.ProductList.route, Icons.Filled.Info)
+        BottomNavItem.BottomNavItem("Produk", Screen.ListProduct.route, Icons.Filled.Info)
     )
 
     NavigationBar(
