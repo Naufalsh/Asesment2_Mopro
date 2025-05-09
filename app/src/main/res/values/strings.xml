@@ -4,4 +4,8 @@
     <string name="list_kosong">Belum ada data</string>
     <string name="kembali">kembali</string>
     <string name="simpan"> Simpan</string>
+    <string name="nama_produk">Nama Produk</string>
+    <string name="deskripsi_produk">Deskripsi Produk</string>
+    <string name="harga">Harga</string>
+    <string name="edit_produk">Edit</string>
 </resources>
