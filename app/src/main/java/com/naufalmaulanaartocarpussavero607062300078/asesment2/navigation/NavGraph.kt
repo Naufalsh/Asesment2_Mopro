@@ -2,12 +2,11 @@ package com.naufalmaulanaartocarpussavero607062300078.asesment2.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.navigation.navArgument
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.MainScreen
+import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen.ProdukListScreen
 
 @Composable
 fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
@@ -17,6 +16,9 @@ fun SetupNavGraph(navController: NavHostController = rememberNavController()) {
     ) {
         composable(route = Screen.Home.route) {
             MainScreen(navController)
+        }
+        composable(route = Screen.ProductList.route) {
+            ProdukListScreen(navController)
         }
     }
 }
