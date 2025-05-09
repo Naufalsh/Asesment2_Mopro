@@ -1,5 +1,6 @@
 package com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,10 +17,14 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
@@ -35,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,12 +50,19 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.R
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.model.Product
+import com.naufalmaulanaartocarpussavero607062300078.asesment2.model.SettingsDataStore
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.navigation.Screen
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.components.BottomNavItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ListProductScreen(navController: NavHostController) {
+    val dataStore = SettingsDataStore(LocalContext.current)
+    val showList by dataStore.layoutFlow.collectAsState(true)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -60,6 +73,25 @@ fun ListProductScreen(navController: NavHostController) {
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
+                actions = {
+                    IconButton(onClick = {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            dataStore.saveLayout(!showList)
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(
+                                if (showList) R.drawable.baseline_grid_view_24
+                                else R.drawable.baseline_view_list_24
+                            ),
+                            contentDescription = stringResource(
+                                if (showList) R.string.grid
+                                else R.string.list
+                        ),
+                        tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             )
         },
         bottomBar = { BottomNavigationBars(navController) },
@@ -77,18 +109,15 @@ fun ListProductScreen(navController: NavHostController) {
             }
         }
     ) { innerPadding ->
-        ScreenContents(showList = true, modifier = Modifier.padding(innerPadding), navController)
+        ScreenContents(showList, modifier = Modifier.padding(innerPadding), navController)
     }
 }
 
 
 @Composable
 fun ScreenContents(showList: Boolean, modifier: Modifier = Modifier, navController: NavHostController) {
-//    val context = LocalContext.current
-//    val factory = ViewModelFactory(context)
     val viewModel: ProductViewModel = viewModel()
     val data by viewModel.allProducts.collectAsState()
-
 
 
     if (data.isEmpty()) {
@@ -98,14 +127,31 @@ fun ScreenContents(showList: Boolean, modifier: Modifier = Modifier, navControll
             horizontalAlignment = Alignment.CenterHorizontally
         ) { Text( text = stringResource(id = R.string.list_kosong)) }
     } else {
-        LazyColumn(
-            modifier = modifier.fillMaxSize()
-        ) {
-            items(data) {
-                ListItems(product = it) {
-                    navController.navigate(Screen.ubahProduct.withId(it.id))
+        if (showList) {
+            LazyColumn(
+                modifier = modifier.fillMaxSize()
+            ) {
+                items(data) {
+                    ListItems(product = it) {
+                        navController.navigate(Screen.ubahProduct.withId(it.id))
+                    }
+                    HorizontalDivider()
                 }
-                HorizontalDivider()
+            }
+        }
+        else {
+            LazyVerticalStaggeredGrid(
+                modifier = modifier.fillMaxSize(),
+                columns = StaggeredGridCells.Fixed(2),
+                verticalItemSpacing = 8.dp,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 84.dp)
+            ) {
+                items(data) {
+                    GridItem(product = it) {
+                        navController.navigate(Screen.ubahProduct.withId(it.id))
+                    }
+                }
             }
         }
 
@@ -115,8 +161,16 @@ fun ScreenContents(showList: Boolean, modifier: Modifier = Modifier, navControll
 @Composable
 fun BottomNavigationBars(navController: NavHostController) {
     val items = listOf(
-        BottomNavItem.BottomNavItem("Penjualan", Screen.Home.route, Icons.Filled.Warning),
-        BottomNavItem.BottomNavItem("Produk", Screen.ListProduct.route, Icons.Filled.Info)
+        BottomNavItem.DrawableIconItem(
+            navName = "Penjualan",
+            navRoute = Screen.Home.route,
+            iconResId = R.drawable.baseline_sell_24 // Ganti dengan drawable Anda
+        ),
+        BottomNavItem.DrawableIconItem(
+            navName = "Produk",
+            navRoute = Screen.ListProduct.route,
+            iconResId = R.drawable.baseline_shopping_bag_24
+        )
     )
 
     NavigationBar(
@@ -128,7 +182,7 @@ fun BottomNavigationBars(navController: NavHostController) {
 
         items.forEach { item ->
             NavigationBarItem(
-                icon = { Icon(item.icon, contentDescription = item.name) },
+                icon = { item.Icon(isSelected = currentRoute == item.route) },
                 label = { Text(item.name) },
                 selected = currentRoute == item.route,
                 onClick = {
@@ -170,5 +224,33 @@ fun ListItems(product: Product, onClick: () -> Unit) {
             overflow = TextOverflow.Ellipsis
         )
         Text(text = product.price.toString())
+    }
+}
+
+@Composable
+fun GridItem(product: Product, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable() { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        border = BorderStroke(1.dp, DividerDefaults.color)
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+        ) {
+            Text(
+                text = product.name,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = product.descProduct,
+                maxLines = 4,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(text = product.price.toString())
+        }
     }
 }

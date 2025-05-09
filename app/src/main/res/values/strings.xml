@@ -27,6 +27,9 @@
     <string name="pesan_hapus_product">Hapus Data ini?</string>
     <string name="tombol_hapus">Hapus</string>
     <string name="tombol_batal">Batal</string>
+    <string name="invalid">Form tidak boleh ada yang kosong!</string>
 
+    <string name="list">Tampilan List</string>
+    <string name="grid">Tampilan Grid</string>
 
 </resources>

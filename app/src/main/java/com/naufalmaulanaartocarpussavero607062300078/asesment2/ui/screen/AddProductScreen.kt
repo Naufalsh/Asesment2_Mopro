@@ -1,5 +1,6 @@
 package com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -28,6 +30,7 @@ const val KEY_ID_PRODUCT = "idProduct"
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddProductScreen(navController: NavHostController, id: Long? = null) {
+    val context = LocalContext.current
     val viewModel: ProductViewModel = viewModel()
 
     var name by remember { mutableStateOf("") }
@@ -74,6 +77,11 @@ fun AddProductScreen(navController: NavHostController, id: Long? = null) {
                 actions = {
                     IconButton(
                         onClick = {
+                            if (name == "" || description == "" || price == "" || !price.matches(Regex("^\\d+(\\.\\d{1,2})?$"))) {
+                                Toast.makeText(context, R.string.invalid, Toast.LENGTH_LONG).show()
+                                return@IconButton
+                            }
+
                             val priceValue = price.toDoubleOrNull() ?: 0.0
                             val product = Product(
                                 id = id ?: 0L,

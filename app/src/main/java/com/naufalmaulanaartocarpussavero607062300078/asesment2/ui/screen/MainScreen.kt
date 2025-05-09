@@ -1,5 +1,6 @@
 package com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.screen
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -32,28 +33,45 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DividerDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.R
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.model.Product
+import com.naufalmaulanaartocarpussavero607062300078.asesment2.model.Sales
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.model.SalesWithProduct
+import com.naufalmaulanaartocarpussavero607062300078.asesment2.model.SettingsDataStore
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.navigation.Screen
 import com.naufalmaulanaartocarpussavero607062300078.asesment2.ui.components.BottomNavItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MainScreen(navController: NavHostController) {
+    val dataStore = SettingsDataStore(LocalContext.current)
+    val showList by dataStore.layoutFlow.collectAsState(true)
+
     val viewModel: SalesViewModel = viewModel()
     val salesData by viewModel.allSales.collectAsState(initial = emptyList())
 
-    // Hitung total pendapatan
     val totalRevenue = remember(salesData) {
         salesData.sumOf { it.sales.totalPrice }
     }
@@ -67,11 +85,29 @@ fun MainScreen(navController: NavHostController) {
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.primary,
                 ),
+                actions = {
+                    IconButton(onClick = {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            dataStore.saveLayout(!showList)
+                        }
+                    }) {
+                        Icon(
+                            painter = painterResource(
+                                if (showList) R.drawable.baseline_grid_view_24
+                                else R.drawable.baseline_view_list_24
+                            ),
+                            contentDescription = stringResource(
+                                if (showList) R.string.grid
+                                else R.string.list
+                            ),
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                }
             )
         },
         bottomBar = {
             Column {
-                // Tambahkan Box untuk total pendapatan di atas bottom navigation
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -101,7 +137,7 @@ fun MainScreen(navController: NavHostController) {
             }
         }
     ) { innerPadding ->
-        ScreenContent(showList = true, modifier = Modifier.padding(innerPadding), navController)
+        ScreenContent(showList, modifier = Modifier.padding(innerPadding), navController)
     }
 }
 
@@ -118,28 +154,52 @@ fun ScreenContent(showList: Boolean, modifier: Modifier = Modifier, navControlle
             horizontalAlignment = Alignment.CenterHorizontally
         ) { Text( text = stringResource(id = R.string.list_kosong)) }
     } else {
-        LazyColumn(
-            modifier = modifier.fillMaxSize()
-        ) {
-            items(data) { saleWithProduct ->
-                SaleItem(sale = saleWithProduct) {
-                    navController.navigate(Screen.ubahPenjualan.withIdPenjualan(saleWithProduct.sales.id))
+        if (showList) {
+            LazyColumn(
+                modifier = modifier.fillMaxSize()
+            ) {
+                items(data) { saleWithProduct ->
+                    SaleItem(sale = saleWithProduct) {
+                        navController.navigate(Screen.ubahPenjualan.withIdPenjualan(saleWithProduct.sales.id))
+                    }
+                    HorizontalDivider()
                 }
-                HorizontalDivider()
             }
         }
-
+        else {
+            LazyVerticalStaggeredGrid(
+                modifier = modifier.fillMaxSize(),
+                columns = StaggeredGridCells.Fixed(2),
+                verticalItemSpacing = 8.dp,
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(8.dp, 8.dp, 8.dp, 84.dp)
+            ) {
+                items(data) {
+                    GridItemSales(sales = it) {
+                        navController.navigate(Screen.ubahProduct.withId(it.product.id))
+                    }
+                }
+            }
+        }
     }
 }
 @Composable
 fun BottomNavigationBar(navController: NavHostController) {
     val items = listOf(
-        BottomNavItem.BottomNavItem("Penjualan", Screen.Home.route, Icons.Filled.Warning),
-        BottomNavItem.BottomNavItem("Produk", Screen.ListProduct.route, Icons.Filled.Info)
+        BottomNavItem.DrawableIconItem(
+            navName = "Penjualan",
+            navRoute = Screen.Home.route,
+            iconResId = R.drawable.baseline_sell_24
+        ),
+        BottomNavItem.DrawableIconItem(
+            navName = "Produk",
+            navRoute = Screen.ListProduct.route,
+            iconResId = R.drawable.baseline_shopping_bag_24
+        )
     )
 
     NavigationBar(
-        containerColor =  MaterialTheme.colorScheme.primaryContainer,
+        containerColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = Color.White
     ) {
         val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -147,7 +207,7 @@ fun BottomNavigationBar(navController: NavHostController) {
 
         items.forEach { item ->
             NavigationBarItem(
-                icon = { Icon(item.icon, contentDescription = item.name) },
+                icon = { item.Icon(isSelected = currentRoute == item.route) },
                 label = { Text(item.name) },
                 selected = currentRoute == item.route,
                 onClick = {
@@ -159,10 +219,10 @@ fun BottomNavigationBar(navController: NavHostController) {
                     }
                 },
                 colors = NavigationBarItemDefaults.colors(
-                    selectedIconColor = Color.White,
-                    selectedTextColor = Color.White,
-                    unselectedIconColor =  MaterialTheme.colorScheme.primary,
-                    unselectedTextColor =  MaterialTheme.colorScheme.primary
+                    selectedIconColor = MaterialTheme.colorScheme.surface,
+                    selectedTextColor = MaterialTheme.colorScheme.surface,
+                    unselectedIconColor = MaterialTheme.colorScheme.primary,
+                    unselectedTextColor = MaterialTheme.colorScheme.primary
                 )
             )
         }
@@ -194,6 +254,37 @@ fun SaleItem(sale: SalesWithProduct, onClick: () -> Unit) {
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
+    }
+}
+
+@Composable
+fun GridItemSales(sales: SalesWithProduct, onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable() { onClick() },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        ),
+        border = BorderStroke(1.dp, DividerDefaults.color)
+    ) {
+        Column(
+            modifier = Modifier.padding(8.dp),
+        ) {
+            Text(
+                text = sales.product.name,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = sales.sales.quantity.toString(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(text = sales.sales.totalPrice.toString(),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+                fontWeight = FontWeight.Bold)
+        }
     }
 }
 
